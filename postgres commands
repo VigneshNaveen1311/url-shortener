@@ -1,0 +1,5 @@
+list dbs -> \l
+
+connect to db -> \c <dbname>
+
+inspect table -> \d

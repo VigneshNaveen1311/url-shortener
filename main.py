@@ -6,8 +6,10 @@ import random, string
 
 app = FastAPI()
 
+
 class UrlRequest(BaseModel):
     url: str
+
 
 def generate_short_code(length: int =5):
     chars = string.ascii_letters + string.digits
@@ -17,17 +19,26 @@ def generate_short_code(length: int =5):
 def shorten_url(data: UrlRequest):
     conn = get_connection()
     cur = conn.cursor()
-
-    short_code = generate_short_code()
-
     url = data.url
+
     if not url.startswith(("http://", "https://")):
         url = "https://"+url
 
-    cur.execute("INSERT INTO urls (short_code, original_url) VALUES (%s, %s)",
-                (short_code, url))
-    
-    conn.commit()
+    while True:
+        short_code = generate_short_code()
+        cur.execute("""INSERT INTO urls (short_code, original_url)
+                    VALUES (%s, %s)
+                    ON CONFLICT (short_code) DO NOTHING""",
+                    (short_code, url))
+        
+        if cur.rowcount == 1:
+            conn.commit()
+            break
+        else:
+            print("rollingback")
+            conn.rollback()
+            continue
+
     cur.close()
     conn.close()
 
@@ -35,7 +46,6 @@ def shorten_url(data: UrlRequest):
         "short_code": short_code,
         "short_url": f"http://localhost:8000/{short_code}"
     }
-
 
 @app.get("/{short_code}")
 def redirect_to_url(short_code: str):

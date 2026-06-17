@@ -2,9 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from db import get_connection
+from redis import Redis
 import random, string
 
 app = FastAPI()
+r = Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
 
 class UrlRequest(BaseModel):
@@ -14,6 +16,19 @@ class UrlRequest(BaseModel):
 def generate_short_code(length: int =5):
     chars = string.ascii_letters + string.digits
     return ''.join(random.choices(chars, k=length))
+
+def update_analytics(short_code):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+                UPDATE urls
+                SET click_count = click_count+1,
+                    last_accessed = NOW()
+                WHERE short_code = %s;
+                """, (short_code,))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 @app.post("/shorten")
 def shorten_url(data: UrlRequest):
@@ -34,10 +49,6 @@ def shorten_url(data: UrlRequest):
         if cur.rowcount == 1:
             conn.commit()
             break
-        else:
-            print("rollingback")
-            conn.rollback()
-            continue
 
     cur.close()
     conn.close()
@@ -50,6 +61,12 @@ def shorten_url(data: UrlRequest):
 @app.get("/{short_code}")
 def redirect_to_url(short_code: str):
     print("SHORT CODE RECEIVED =", repr(short_code), flush=True)
+    cached_url = r.get(short_code)
+    if  cached_url is not None:
+        print("CACHE HIT")
+        update_analytics(short_code)
+        return RedirectResponse(url = cached_url)
+    print("CACHE MISS")
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("select current_database()")
@@ -65,4 +82,6 @@ def redirect_to_url(short_code: str):
     if row is None:
         raise HTTPException(status_code=404, detail="Short url not found")
     else:
+        r.set(short_code, row[0], ex=60)
+        update_analytics(short_code)
         return RedirectResponse(url=row[0])

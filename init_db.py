@@ -14,6 +14,12 @@ create table if not exists urls(
 """)
 #added unique shortcode constraint in terminal for short_code
 #ALTER TABLE urls ADD CONSTRAINT unique_short_code UNIQUE(short_code);
+
+#added click count and last accessed timestamp
+# ALTER TABLE urls
+# ADD COLUMN click_count INTEGER DEFAULT 0,
+# ADD COLUMN last_accessed TIMESTAMP DEFAULT NOW();
+
 conn.commit()
 cur.close()
 conn.close()

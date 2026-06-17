@@ -11,6 +11,7 @@ r = Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
 class UrlRequest(BaseModel):
     url: str
+    custom_alias: str | None = None
 
 
 def generate_short_code(length: int =5):
@@ -40,7 +41,10 @@ def shorten_url(data: UrlRequest):
         url = "https://"+url
 
     while True:
-        short_code = generate_short_code()
+        if data.custom_alias:
+            short_code = data.custom_alias
+        else:
+            short_code = generate_short_code()
         cur.execute("""INSERT INTO urls (short_code, original_url)
                     VALUES (%s, %s)
                     ON CONFLICT (short_code) DO NOTHING""",
@@ -49,6 +53,11 @@ def shorten_url(data: UrlRequest):
         if cur.rowcount == 1:
             conn.commit()
             break
+        elif data.custom_alias:
+            raise HTTPException(
+                status_code=409,
+                detail="Alias already exists"
+            )
 
     cur.close()
     conn.close()

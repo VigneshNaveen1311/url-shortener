@@ -54,6 +54,9 @@ def shorten_url(data: UrlRequest):
             conn.commit()
             break
         elif data.custom_alias:
+            cur.close()
+            conn.close()
+            
             raise HTTPException(
                 status_code=409,
                 detail="Alias already exists"

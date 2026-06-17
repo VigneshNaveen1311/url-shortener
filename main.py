@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from db import get_connection
 from redis import Redis
 import random, string
+import os
+
+SERVER = os.getenv("SERVER", "Unknown")
 
 app = FastAPI()
 r = Redis(host="localhost", port=6379, db=0, decode_responses=True)
@@ -13,6 +16,12 @@ class UrlRequest(BaseModel):
     url: str
     custom_alias: str | None = None
 
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "server": SERVER
+    }
 
 def generate_short_code(length: int =5):
     chars = string.ascii_letters + string.digits
@@ -56,7 +65,6 @@ def shorten_url(data: UrlRequest):
         elif data.custom_alias:
             cur.close()
             conn.close()
-            
             raise HTTPException(
                 status_code=409,
                 detail="Alias already exists"

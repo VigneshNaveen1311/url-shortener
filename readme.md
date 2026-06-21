@@ -12,6 +12,8 @@ This project was built incrementally while learning:
 - Health Checks
 - Caching
 - Analytics
+- Docker
+
 
 ---
 
@@ -187,9 +189,42 @@ url-shortener/
 ├── lb.py            # Custom reverse proxy/load balancer
 ├── db.py            # PostgreSQL connection helper
 ├── init_db.py       # Database initialization script
+├── Dockerfile       # Backend container image
+├── Dockerfile.lb    # Load balancer container image
+├── docker-compose.yml # Multi-container orchestration
 ├── requirements.txt
 ├── pyproject.toml
 └── README.md
+```
+
+---
+
+# Docker Upgrades
+
+This project now includes a full Docker-based deployment for the complete stack:
+
+- `postgres` service running PostgreSQL
+- `redis` service running Redis
+- `backend1`, `backend2`, `backend3` services running the FastAPI backend in parallel
+- `loadbalancer` service running the custom FastAPI reverse proxy
+
+The Docker Compose setup includes:
+
+- shared PostgreSQL database with persistent volume
+- shared Redis cache for both backend and load balancer health state
+- three backend replicas with separate server names
+- a separate load balancer container exposing HTTP traffic on port `8000`
+
+Run the full system with:
+
+```powershell
+docker compose up --build
+```
+
+And stop it with:
+
+```powershell
+docker compose down
 ```
 
 ---

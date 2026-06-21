@@ -9,7 +9,7 @@ import os
 SERVER = os.getenv("SERVER", "Unknown")
 
 app = FastAPI()
-r = Redis(host="redis-cache", port=6379, db=0, decode_responses=True)
+r = Redis(host="redis", port=6379, db=0, decode_responses=True)
 
 
 class UrlRequest(BaseModel):

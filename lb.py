@@ -7,12 +7,12 @@ from redis import Redis
 
 app = FastAPI()
 
-r = Redis(host='localhost', port=6379, db=1, decode_responses=True)
+r = Redis(host='redis', port=6379, db=1, decode_responses=True)
 
 servers = [
-    "http://127.0.0.1:8001/",
-    "http://127.0.0.1:8002/",
-    "http://127.0.0.1:8003/"
+    "http://backend1:8000/",
+    "http://backend2:8000/",
+    "http://backend3:8000/"
 ]
 
 

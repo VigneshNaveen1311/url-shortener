@@ -1,0 +1,109 @@
+
+
+docker network create app-network
+
+docker network ls
+
+docker run -d `
+--name postgres-db `
+--network app-network `
+-e POSTGRES_PASSWORD=123 `
+-e POSTGRES_DB=url_shortener `
+-p 5432:5432 `
+postgres
+
+psql -U postgres -h localhost
+
+123
+
+\l
+
+\c url_shortener
+
+CREATE TABLE urls(
+    id SERIAL PRIMARY KEY,
+    short_code VARCHAR(10) UNIQUE NOT NULL,
+    original_url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    click_count INTEGER DEFAULT 0,
+    last_accessed TIMESTAMP DEFAULT NOW()
+);
+
+\d
+
+docker build -f Dockerfile.dev -t url-shortener-dev .
+
+docker run -it `
+--network app-network `
+-p 8001:8000 `
+-v ${PWD}:/app `
+url-shortener-dev
+
+
+
+docker build -t url-shortener .
+
+docker run -d `
+--name url-shortener `
+--network app-network `
+-p 8001:8000 `
+url-shortener
+
+docker run -d `
+--name redis-cache `
+--network app-network `
+-p 6379:6379 `
+redis
+
+
+
+3 instances in docker:
+
+docker build --no-cache -t url-shortener .
+
+
+docker run -d `
+--name backend1 `
+--network app-network `
+-e SERVER=Server1 `
+-p 8001:8000 `
+url-shortener
+
+docker run -d `
+--name backend2 `
+--network app-network `
+-e SERVER=Server2 `
+-p 8002:8000 `
+url-shortener
+
+docker run -d `
+--name backend3 `
+--network app-network `
+-e SERVER=Server3 `
+-p 8003:8000 `
+url-shortener
+
+
+Load balancer:
+
+
+docker build -f Dockerfile.lb -t url-lb .
+
+
+yml:
+
+
+docker compose up --build
+
+psql -U postgres -h localhost
+
+\c url_shortener
+
+CREATE TABLE urls(
+    id SERIAL PRIMARY KEY,
+    short_code VARCHAR(10) UNIQUE NOT NULL,
+    original_url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    click_count INTEGER DEFAULT 0,
+    last_accessed TIMESTAMP DEFAULT NOW()
+);

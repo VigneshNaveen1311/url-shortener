@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: url_shortener
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+
+  backend1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend1
+    environment:
+      SERVER: Server1
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8001:8000"
+
+  backend2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend2
+    environment:
+      SERVER: Server2
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8002:8000"
+
+  backend3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend3
+    environment:
+      SERVER: Server3
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8003:8000"
+
+  loadbalancer:
+    build:
+      context: .
+      dockerfile: Dockerfile.lb
+    container_name: loadbalancer
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

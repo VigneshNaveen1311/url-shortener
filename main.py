@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from db import get_connection
 from redis import Redis
 import random, string
@@ -9,12 +9,12 @@ import os
 SERVER = os.getenv("SERVER", "Unknown")
 
 app = FastAPI()
-r = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+r = Redis(host="redis-cache", port=6379, db=0, decode_responses=True)
 
 
 class UrlRequest(BaseModel):
     url: str
-    custom_alias: str | None = None
+    custom_alias: str | None = Field(default=None, example=None)
 
 @app.get("/health")
 def health_check():
@@ -50,7 +50,7 @@ def shorten_url(data: UrlRequest):
         url = "https://"+url
 
     while True:
-        if data.custom_alias:
+        if data.custom_alias and data.custom_alias != "string":
             short_code = data.custom_alias
         else:
             short_code = generate_short_code()

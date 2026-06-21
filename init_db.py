@@ -20,6 +20,16 @@ create table if not exists urls(
 # ADD COLUMN click_count INTEGER DEFAULT 0,
 # ADD COLUMN last_accessed TIMESTAMP DEFAULT NOW();
 
+#full command in one shot
+# CREATE TABLE urls(
+#     id SERIAL PRIMARY KEY,
+#     short_code VARCHAR(10) UNIQUE NOT NULL,
+#     original_url TEXT NOT NULL,
+#     created_at TIMESTAMP DEFAULT NOW(),
+#     click_count INTEGER DEFAULT 0,
+#     last_accessed TIMESTAMP DEFAULT NOW()
+# );
+
 conn.commit()
 cur.close()
 conn.close()

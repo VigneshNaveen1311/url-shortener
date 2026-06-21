@@ -2,7 +2,7 @@ import psycopg
 
 def get_connection():
     return psycopg.connect(
-        host="localhost",
+        host="postgres-db",
         port=5432,
         dbname="url_shortener",
         user="postgres",

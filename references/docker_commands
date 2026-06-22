@@ -107,3 +107,10 @@ CREATE TABLE urls(
     click_count INTEGER DEFAULT 0,
     last_accessed TIMESTAMP DEFAULT NOW()
 );
+
+
+docker compose down
+
+docker compose build
+(or)
+docker compose up --build

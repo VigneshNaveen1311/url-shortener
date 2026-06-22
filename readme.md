@@ -1,6 +1,44 @@
 # URL Shortener + Redis Cache + PostgreSQL + Custom Load Balancer
 
+## Important Commands
+Run these to set up and manage the project:
+```
+docker compose up --build
+docker compose down
+docker compose logs -f
+docker ps
+psql -U postgres -h localhost
+```
+
+## Prerequisites
+Ensure you have the following installed before running the project:
+
+- Docker Desktop (includes Docker Engine + Docker Compose)
+- Git (optional, for cloning the repository)
+
+### Optional (for local development / debugging)
+
+These are **not required** when using Docker Compose, but may be useful:
+
+- Python 3.10+
+- `pip`
+- PostgreSQL client (`psql`) for manually inspecting the database
+
 A URL Shortener built with FastAPI, PostgreSQL, Redis, and a custom Python reverse proxy/load balancer.
+
+Update the Prerequisites list to include inline footnote references and place footnote definitions below.
+
+For clarity, the optional items now reference the explanatory footnotes below:
+
+- Python 3.10+
+- `pip`
+- PostgreSQL client (`psql`)
+
+Redis — used for caching and backend health state. You can run the included `redis` service via Docker Compose or install Redis locally.
+
+Python — Python 3.10+ is required to run the backend directly; install dependencies with `pip install -r requirements.txt` or via the provided `pyproject.toml`.
+
+PostgreSQL — the app stores data in Postgres. Use the `postgres` service in Docker Compose or connect with a local Postgres instance using `psql`.
 
 This project was built incrementally while learning:
 
